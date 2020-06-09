@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+  <h1>结论一：下一个promise默认拿（上一个then或catch）return中返回的数据，如果没有return，那就是js默认的return undefined</h1>
+  <h2>结论二：但是如果在then或catch里的不是return，而是throw，那么抛出的东西就会被下一个的catch捕获到，而不会进入then</h2>
+  <script>
+  //当上一个promise为catch的时候，下一个捕获到的是什么呢
+  let first = new Promise((resolve,reject) => {
+    reject('err')
+  })
+  let second = first.then(data=>{
+    console.log('second then-->',data);
+  }).catch(err => {
+    console.warn('second catch-->',err)
+    // return err//不加这个的话就默认返回undefined了，也就是说即便是第二个是catch了，下一个promise也只会默认拿return里的东西
+    // throw new Error('手动 error')
+    console.log('反正我是可以被执行的')
+    throw '手动error二' //在这里可以看到throw有着和return类似的功效,即后面的代码将不被执行
+    console.log('我能被执行吗')
+    return err
+  })
+  let third = second.then(data => {
+    console.log('third then-->',data)
+  }).catch(err => {
+    console.warn('third catch-->',err)
+  })
+  </script>
+</body>
+</html>

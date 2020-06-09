@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+  <script>
+    var p=new Promise((res,rej)=>{
+      
+      try {
+        throw 2;
+          setTimeout(()=>{
+          res('get ready');  
+        },3000)
+      } catch (error) {
+        console.log('catch')
+        res(error)
+      }
+      
+    })
+    p.then(data=>{
+      console.log(data)
+      console.log(p)
+      return new Promise((res,rej)=>{
+        setTimeout(()=>{
+          res(data+' again deal');
+        },2000)
+      })
+    })
+    .then(data=>{
+      //promise还是那个promise，但传递给下一个的可以通过return new Promise来改变下一个收到的data,
+      console.log('again');
+      console.log(data);
+      console.log(p);
+    })
+    console.log(p);
+
+    // mergePromise
+    // var pro=Promise.resolve(1).then(data=>console.log('zhijie resolve '+data));
+    const timeout = ms => new Promise((resolve, reject) => {
+    setTimeout(() => {
+        resolve();
+        }, ms);
+    });
+
+    const ajax1 = () => timeout(2000).then(() => {
+        console.log('1');
+        return 1;
+    });
+  console.log('ajax1',ajax1())
+    const ajax2 = () => timeout(1000).then(() => {
+        console.log('2');
+        return 2;
+    });
+
+    const ajax3 = () => timeout(2000).then(() => {
+        console.log('3');
+        return 3;
+    });
+
+    const mergePromise = ajaxArray => {
+        // 保存数组中的函数执行后的结果
+        var data = [];
+
+        // Promise.resolve方法调用时不带参数，直接返回一个resolved状态的 Promise 对象。
+        var sequence = Promise.resolve();
+        console.log('sequence==>',sequence)
+        ajaxArray.forEach(function (item) {
+          // 第一次的 then 方法用来执行数组中的每个函数，
+          // 第二次的 then 方法接受数组中的函数执行后返回的结果，
+          // 并把结果添加到 data 中，然后把 data 返回。
+          sequence = sequence.then(item).then(function (res) {
+              data.push(res);
+              return data;
+          });
+        })
+
+        // 遍历结束后，返回一个 Promise，也就是 sequence， 他的 [[PromiseValue]] 值就是 data，
+        // 而 data（保存数组中的函数执行后的结果） 也会作为参数，传入下次调用的 then 方法中。
+        return sequence;
+    };
+
+    mergePromise([ajax1, ajax2, ajax3]).then(data => {
+        console.log('done');
+        console.log(data); // data 为 [1, 2, 3]
+    });
+  </script>
+</body>
+</html>
