@@ -6,15 +6,17 @@
   <title>Document</title>
 </head>
 <body>
-  <h2>从例一可以看到Promise在调用的时候promise内部通过异步的形式进行调用了，难道是开启了一个异步队列吗</h2>
+  <h2>从例一可以看到Promise在调用的then中采用异步的形式进行调用了，难道是开启了一个异步队列吗</h2>
+  <h2>promise的方法体还是按照同步的方式执行了，但是最终的凝固却是异步的(resolve/reject)</h2>
   <script>
     /* 例子一**/
     console.log('before init promise');
     const pro = new Promise((resolve, reject) => {
       console.log('in promise')
-      resolve(1);
+      // resolve(1);
+      reject(2)
     })
-    pro.then(d => console.log('d-->',d));
+    pro.then(d => console.log('d-->',d)).catch(e => console.log('err->',e))
     console.log('after')
   </script>
 </body>
