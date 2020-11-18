@@ -45,19 +45,22 @@
         resolve();
         }, ms);
     });
-
+    let t = new Date().getTime();
     const ajax1 = () => timeout(2000).then(() => {
-        console.log('1');
+        const now = new Date().getTime();
+        console.log('1', now - t);
         return 1;
     });
   console.log('ajax1',ajax1())
     const ajax2 = () => timeout(1000).then(() => {
-        console.log('2');
+      const now = new Date().getTime();
+        console.log('2', now - t);
         return 2;
     });
 
     const ajax3 = () => timeout(2000).then(() => {
-        console.log('3');
+      const now = new Date().getTime();
+        console.log('3', now - t);
         return 3;
     });
 
@@ -73,6 +76,7 @@
           // 第二次的 then 方法接受数组中的函数执行后返回的结果，
           // 并把结果添加到 data 中，然后把 data 返回。
           sequence = sequence.then(item).then(function (res) {
+            console.log('res-->',res,sequence)
               data.push(res);
               return data;
           });
@@ -80,6 +84,7 @@
 
         // 遍历结束后，返回一个 Promise，也就是 sequence， 他的 [[PromiseValue]] 值就是 data，
         // 而 data（保存数组中的函数执行后的结果） 也会作为参数，传入下次调用的 then 方法中。
+        console.log('sequence-->',sequence)//可以看到并不能拿到promise数组
         return sequence;
     };
 
@@ -87,6 +92,14 @@
         console.log('done');
         console.log(data); // data 为 [1, 2, 3]
     });
+    /*mergePromise中sequence到底发生了什么事：
+      首先返回了一个promise对象（是forEach执行到最后的那个Promise）
+      这个Promise看起来和没有被forEach加工过
+      但实际上对这个Promise的加工是一个异步的过程（开启了异步队列）
+      在方法调用之后，forEach（或函数内）对Promise的操作要先于mergePromise的then
+      
+      ????为什么？为什么item后面的then可以执行，的一个then并没有返回值啊，从函数角度看是返回undefine的
+    **/
   </script>
 </body>
 </html>

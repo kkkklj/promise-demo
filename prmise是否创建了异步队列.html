@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    .blank{
+      height: 50px;
+    }
+  </style>
+</head>
+<body>
+  <h2>从例一可以看到Promise在调用的then中采用异步的形式进行调用了，难道是开启了一个异步队列吗</h2>
+  <h2>promise的方法体还是按照同步的方式执行了，但是最终的凝固却是异步的(resolve/reject)</h2>
+
+  <div class="blank"></div>
+
+  <h2>例二中，可以看到即便return出来的不是一个promise对象，但最终打印出来的依旧是promise实例</h2>
+  <script>
+    /* 例子一**/
+    console.log('before init promise');
+    const pro = new Promise((resolve, reject) => {
+      console.log('in promise')
+      // resolve(1);
+      reject(2)
+    })
+    pro.then(d => console.log('d-->',d)).catch(e => console.log('err->',e))
+    console.log('after')
+
+    /* 例子二**/
+    const pro2 = new Promise((resolve, reject) => {
+      resolve(1)
+    })
+    const pro2Then = pro2.then(()=>{return 1});
+    console.log('pro2then-->',pro2Then) 
+
+
+    /* 例三**/
+    // 例三中发现了一个问题
+    console.warn('3')
+    const time1 = new Promise((resolve, reject) => {
+      setTimeout(() => {
+        resolve(500)
+      }, 500);
+    });
+    const time2 = new Promise((resolve, reject) => {
+      setTimeout(() => {
+        resolve(1500)
+      }, 1500);
+    });
+    const time3 = new Promise((resolve, reject) => {
+      setTimeout(() => {
+        resolve(3000)
+      }, 3000);
+    });
+    const proAll = Promise.resolve().then(() => {
+      return [time1, time2, time3]
+    })
+    proAll.then(d => {console.log('d-->',d)})//可以看到出现了三个pending的promise（快速）
+    console.log('proAll-->',proAll)
+    
+    setTimeout(() => {//这个promise并没有等待数组中的promise，而是提前凝固
+      console.log('proAll-2000->',proAll)
+    }, 1000);
+    setTimeout(() => {
+      console.log('proAll-4000->',proAll)
+    }, 4000);
+
+    //进阶操作
+    time1.then(time3).then(d => console.log('time1 then time3',d))//输出的却是time1
+    Promise.resolve().then(time3).then(d => console.log('resolve then time3',d))//undefine
+    Promise.resolve().then(time3.then(() => {
+      console.log('force')
+      return 'time finished'
+    })).then(d => console.log('resolve then time3',d))//undefine，证明了仿PromiseAll中第一个then确实是返回了undefined
+
+
+    const proAll2 = Promise.resolve().then(() => {
+      return [1,2,3]
+    }).then(d => console.log('pro2--d-->',d))
+
+  </script>
+</body>
+</html>
