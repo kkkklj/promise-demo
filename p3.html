@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <h2>从例一可以看到Promise在调用的时候promise内部通过异步的形式进行调用了，难道是开启了一个异步队列吗</h2>
+  <script>
+    /* 例子一**/
+    console.log('before init promise');
+    const pro = new Promise((resolve, reject) => {
+      console.log('in promise')
+      resolve(1);
+    })
+    pro.then(d => console.log('d-->',d));
+    console.log('after')
+  </script>
+</body>
+</html>
